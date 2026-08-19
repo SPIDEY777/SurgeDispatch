@@ -1,3 +1,10 @@
 spring:
   application:
     name: surge-dispatch
+  datasource:
+    url: jdbc:mysql://localhost:3306/surge_dispatch
+    username: root
+    password: ${SURGE_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
