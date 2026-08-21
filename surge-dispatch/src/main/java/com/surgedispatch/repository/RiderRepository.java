@@ -8,4 +8,5 @@ public interface RiderRepository extends JpaRepository<Rider,Long> {
     boolean existsByEmail(String email);
 
 
+
 }

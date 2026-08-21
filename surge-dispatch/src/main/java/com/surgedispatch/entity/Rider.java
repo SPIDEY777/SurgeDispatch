@@ -1,10 +1,12 @@
 package com.surgedispatch.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 public class Rider {
 
 
