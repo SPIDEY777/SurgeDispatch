@@ -2,6 +2,7 @@ package com.surgedispatch.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -11,14 +12,21 @@ public class Driver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
 
+    @Setter
     private String name;
+
+    @Setter
     @Column( unique = true, nullable = false)
     private String email;
 
+    @Setter
     private String phone;
     @Column( unique = true, nullable = false)
+
+    @Setter
     private String licenseNumber;
 
     private LocalDateTime createdAt;
