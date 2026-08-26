@@ -1,6 +1,6 @@
 package com.surgedispatch.exception;
 
-import org.apache.commons.lang3.builder.EqualsExclude;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +34,19 @@ public class GlobalExceptionHandler {
                 .status((HttpStatus.BAD_REQUEST))
                 .body(message);
         }
+
+    @ExceptionHandler(DuplicateLicenseNumberException.class)
+    public ResponseEntity<String> handleDuplicateLicenseNumberException(DuplicateLicenseNumberException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+    @ExceptionHandler(DriverNotFoundException.class)
+    public ResponseEntity<String> handleDriverNotFoundException(DriverNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
     }
 
 
