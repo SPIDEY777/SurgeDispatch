@@ -1,6 +1,7 @@
 package com.surgedispatch.controller;
 
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.surgedispatch.dto.CreateRiderRequest;
 import com.surgedispatch.dto.RiderResponse;
 import com.surgedispatch.dto.UpdateRiderRequest;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+@Tag(name = "Riders", description = "Rider management APIs")
 @RestController
 public class RiderController {
 
@@ -25,7 +27,7 @@ public class RiderController {
     }
 
 
-
+    @Operation(summary = "Create a new rider")
      @PostMapping("/api/v1/riders")
      public ResponseEntity<RiderResponse> createRider(
              @Valid @RequestBody CreateRiderRequest createRiderRequest) {
@@ -38,7 +40,7 @@ public class RiderController {
                  .status(HttpStatus.CREATED)
                  .body(response);
      }
-
+    @Operation(summary = "Get rider by ID")
      @GetMapping("/api/v1/riders/{id}")
     public ResponseEntity<RiderResponse> getRider(@PathVariable Long id){
 
@@ -49,6 +51,7 @@ public class RiderController {
 
           return ResponseEntity.ok(response);
      }
+    @Operation(summary = "Get all riders")
     @GetMapping("/api/v1/riders")
     public ResponseEntity<List<RiderResponse>> getAllRider(){
 
@@ -61,6 +64,7 @@ public class RiderController {
          return ResponseEntity.ok(allRiders);
 
     }
+    @Operation(summary = "Update rider")
     @PatchMapping("/api/v1/riders/{id}")
 
     public ResponseEntity<RiderResponse> updateRider(@PathVariable Long id
@@ -74,7 +78,7 @@ public class RiderController {
 
 
     }
-
+    @Operation(summary = "Delete rider")
     @DeleteMapping("/api/v1/riders/{id}")
     public ResponseEntity<Void> deleteRider(@PathVariable Long id) {
 
