@@ -35,6 +35,19 @@ public class Driver {
         this.createdAt = LocalDateTime.now();
     }
 
+    @Setter
+    private String vehicleType;
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DriverStatus status = DriverStatus.OFFLINE;
+    @Setter
+    private Double currentLat;
+    @Setter
+    private Double currentLng;
+    @Setter
+    private LocalDateTime lastLocationUpdate;
+
     protected Driver() {
     }
 

@@ -47,7 +47,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(RideRequestNotFoundException.class)
+    public ResponseEntity<String> handleRideRequestNotFoundException(RideRequestNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
     }
+}
 
 
 
