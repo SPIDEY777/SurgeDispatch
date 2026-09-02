@@ -22,13 +22,15 @@ class DriverServiceTest {
     @Mock
     private DriverRepository driverRepository;
 
+    @Mock
+    private DriverLocationCache driverLocationCache;
+
     private DriverService driverService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        driverService = new DriverService(driverRepository);
+        driverService = new DriverService(driverRepository, driverLocationCache);
     }
 
     @Test
@@ -73,6 +75,7 @@ class DriverServiceTest {
         verify(driverRepository).existsByEmail("rahul@gmail.com");
         verify(driverRepository).save(any(Driver.class));
     }
+
     @Test
     void createDriver_shouldThrowException_whenLicenseNumberAlreadyExists() {
 
@@ -98,6 +101,7 @@ class DriverServiceTest {
         verify(driverRepository, never()).existsByEmail(anyString());
         verify(driverRepository, never()).save(any(Driver.class));
     }
+
     @Test
     void createDriver_shouldThrowException_whenEmailAlreadyExists() {
 
@@ -128,6 +132,7 @@ class DriverServiceTest {
         verify(driverRepository, never())
                 .save(any(Driver.class));
     }
+
     @Test
     void getAllDrivers_shouldReturnAllDrivers() {
 
@@ -161,6 +166,7 @@ class DriverServiceTest {
         // Verify
         verify(driverRepository).findAll();
     }
+
     @Test
     void getDriverById_shouldReturnDriver() {
 
@@ -188,6 +194,7 @@ class DriverServiceTest {
         // Verify
         verify(driverRepository).findById(1L);
     }
+
     @Test
     void getDriverById_shouldThrowException_whenDriverNotFound() {
 
@@ -204,6 +211,7 @@ class DriverServiceTest {
         // Verify
         verify(driverRepository).findById(1L);
     }
+
     @Test
     void deleteDriver_shouldDeleteDriver() {
         // Arrange
@@ -215,10 +223,13 @@ class DriverServiceTest {
         );
         when(driverRepository.findById(1L))
                 .thenReturn(Optional.of(driver));
+
         // Act
         driverService.deleteDriver(1L);
+
         // Verify
         verify(driverRepository).findById(1L);
-        verify(driverRepository).delete(driver); // Fixed: verify delete(driver) instead of deleteById(1L)
+        verify(driverRepository).delete(driver);
+        verify(driverLocationCache).removeDriver(1L);
     }
 }
