@@ -1,11 +1,13 @@
 package com.surgedispatch.service;
 
 import com.surgedispatch.dto.CreateRideRequest;
+import com.surgedispatch.entity.Ride;
 import com.surgedispatch.entity.RideRequest;
 import com.surgedispatch.entity.RideRequestStatus;
 import com.surgedispatch.entity.Rider;
 import com.surgedispatch.exception.RideRequestNotFoundException;
 import com.surgedispatch.exception.RiderNotFoundException;
+import com.surgedispatch.repository.RideRepository;
 import com.surgedispatch.repository.RideRequestRepository;
 import com.surgedispatch.repository.RiderRepository;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RideRequestService {
 
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
+    private final RideRepository rideRepository;
+    private final MatchingEngineService matchingEngineService;
 
-    public RideRequestService(RideRequestRepository rideRequestRepository, RiderRepository riderRepository) {
+    public RideRequestService(RideRequestRepository rideRequestRepository,
+                              RiderRepository riderRepository,
+                              RideRepository rideRepository,
+                              MatchingEngineService matchingEngineService) {
         this.rideRequestRepository = rideRequestRepository;
         this.riderRepository = riderRepository;
+        this.rideRepository = rideRepository;
+        this.matchingEngineService = matchingEngineService;
     }
 
     @Transactional
@@ -40,14 +50,23 @@ public class RideRequestService {
 
         // Auto-expire after 5 minutes if unmatched
         rideRequest.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        RideRequest savedRequest = rideRequestRepository.save(rideRequest);
 
-        return rideRequestRepository.save(rideRequest);
+        // Immediately trigger matching engine with cached candidates
+        matchingEngineService.matchAndDispatch(savedRequest);
+
+        return savedRequest;
     }
 
     @Transactional(readOnly = true)
     public RideRequest getRideRequestById(Long id) {
         return rideRequestRepository.findById(id)
                 .orElseThrow(() -> new RideRequestNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Ride> getRideByRideRequestId(Long rideRequestId) {
+        return rideRepository.findByRideRequestId(rideRequestId);
     }
 
     @Transactional(readOnly = true)

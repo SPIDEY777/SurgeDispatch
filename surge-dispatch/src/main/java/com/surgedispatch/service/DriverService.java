@@ -1,8 +1,11 @@
 package com.surgedispatch.service;
 
 import com.surgedispatch.dto.CreateDriverRequest;
+import com.surgedispatch.dto.DriverLocationUpdateRequest;
+import com.surgedispatch.dto.DriverStatusUpdateRequest;
 import com.surgedispatch.dto.UpdateDriverRequest;
 import com.surgedispatch.entity.Driver;
+import com.surgedispatch.entity.DriverStatus;
 import com.surgedispatch.exception.DriverNotFoundException;
 import com.surgedispatch.exception.DuplicateEmailException;
 import com.surgedispatch.exception.DuplicateLicenseNumberException;
@@ -10,15 +13,18 @@ import com.surgedispatch.repository.DriverRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class DriverService {
 
     private final DriverRepository driverRepository;
+    private final DriverLocationCache driverLocationCache;
 
-    public DriverService(DriverRepository driverRepository) {
+    public DriverService(DriverRepository driverRepository, DriverLocationCache driverLocationCache) {
         this.driverRepository = driverRepository;
+        this.driverLocationCache = driverLocationCache;
     }
 
     @Transactional
@@ -79,8 +85,41 @@ public class DriverService {
     }
 
     @Transactional
+    public Driver updateLocation(Long driverId, DriverLocationUpdateRequest request) {
+        Driver driver = getDriverById(driverId);
+        driver.setCurrentLat(request.getLatitude());
+        driver.setCurrentLng(request.getLongitude());
+        driver.setLastLocationUpdate(LocalDateTime.now());
+
+        Driver savedDriver = driverRepository.save(driver);
+
+        if (savedDriver.getStatus() == DriverStatus.ONLINE) {
+            driverLocationCache.updateLocation(savedDriver);
+        }
+
+        return savedDriver;
+    }
+
+    @Transactional
+    public Driver updateStatus(Long driverId, DriverStatusUpdateRequest request) {
+        Driver driver = getDriverById(driverId);
+        driver.setStatus(request.getStatus());
+
+        Driver savedDriver = driverRepository.save(driver);
+
+        if (savedDriver.getStatus() == DriverStatus.ONLINE && savedDriver.getCurrentLat() != null && savedDriver.getCurrentLng() != null) {
+            driverLocationCache.updateLocation(savedDriver);
+        } else {
+            driverLocationCache.removeDriver(driverId);
+        }
+
+        return savedDriver;
+    }
+
+    @Transactional
     public void deleteDriver(Long id) {
         Driver driver = getDriverById(id);
+        driverLocationCache.removeDriver(id);
         driverRepository.delete(driver);
     }
 }
